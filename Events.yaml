@@ -1,0 +1,122 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: Events
+  description: 'Operations related to Universal Behaviors'
+schemes:
+  - https
+produces:
+  - application/json
+consumes:
+  - application/json
+tags:
+  - name: Events
+    description: Operations related to Universal Behaviors
+paths:
+  /errors:
+    get:
+      summary: Retrieve event submission errors
+      tags:
+        - events
+      operationId: get-events-errors
+      description: Use this API to periodically check to see if any of your event submissions have failed validation.
+      parameters:
+        - type: string
+          in: query
+          name: filter
+          description: optional filter parameter.
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties: {}
+    parameters: []
+  /submission:
+    post:
+      summary: Submit new behavioral events
+      tags:
+        - events
+      operationId: post-submission
+      description: |
+        Use this REST API to submit new behavioral events. 
+
+        ## Map universal behaviors
+        Use this REST API to map the fields in the Campaign database to attributes in Universal behavior.
+
+        ### How It Works
+
+        After the initial database is mapped, whenever a new Universal behavior is captured in by way of Digital Analytics, the following flow will be used to store the universal behavior in your database. A marketer can use this information for improving the campaigns that are created by using programs.
+        1. Exchange calls the existing GET API to get the Campaign database.
+        2. Exchange gets the database list from the Campaign database.
+        3. The Exchange admin selects the Campaign database to be mapped with the universal behavior type.
+        4. Exchange calls the universal behavior provisioning API to store the database ID and universal behavior type mapping in Campaign.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              events:
+                type: array
+                description: events that you want to submit.
+                items:
+                  type: object
+                  properties:
+                    eventTypeCode:
+                      type: string
+                      description: Code representing the type of event.
+                    eventTimestamp:
+                      type: string
+                      description: Event timestamp represented in a String as per RFC 3339.
+                    contactId:
+                      type: string
+                      description: Optional identifier of a contact that is used to match to a contact.
+                    encodeContactId:
+                      type: string
+                      description: Optional encoded identifier of a contact that is used to match to a contact.
+                    attributes:
+                      type: array
+                      description: List of the attributes describing the event.
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            description: Name of the attribute.
+                          value:
+                            type: string
+                            description: The attribute's value.
+                    channel:
+                      type: object
+                      description: Consent data from a consent record.
+                      properties:
+                        channelType:
+                          type: string
+                          description: channel type for consent record.
+                        qualifier:
+                          type: string
+                          description: qualifier for consent record.
+                        destination:
+                          type: string
+                          description: destination value for consent record.
+          description: 'List of event objects. Of the three fields ''contactId'', ''encodeContactId'', and ''channel'' only one is needed. If more than one is provided the priority is as follows: 1. contactId 2. encodeContactId 3. channel'
+      responses:
+        '201':
+          description: Success Event type code is not mapped to any database.
+          schema:
+            type: object
+            properties: {}
+        '400':
+          description: Bad Request Code is invalid/auto provisioned.
+          schema:
+            type: object
+            properties: {}
+        '409':
+          description: Conflict Code is already mapped to a different database.
+          schema:
+            type: object
+            properties: {}
+    parameters: []
+definitions: {}
+securityDefinitions: {}
